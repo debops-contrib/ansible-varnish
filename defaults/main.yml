@@ -1,0 +1,81 @@
+---
+
+#    Copyright (c) 2015 JWD - Jürgen Waibel <http://jwd.de/>
+#
+#    This program is free software: you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by the
+#    Free Software Foundation, either version 3 of the License, or (at your
+#    option) any later version.  Please see LICENSE.txt at the top level of
+#    the source code distribution for details.
+
+# Default variables
+# =================
+
+# .. contents:: Sections
+#    :local:
+#
+# -------------------------------------
+#   varnish cache installation, packages
+# -------------------------------------
+
+# .. envvar:: varnish_server_upstream
+#
+# Enable varnish cache apt repo to install a more resent version?
+# More information: (see https://www.varnish-cache.org/installation/debian)
+varnish_server_upstream: False
+
+# .. envvar:: varnish_upstream_version
+#
+# use this varnish version if installing from upstream repo
+varnish_upstream_version: 4.1
+
+# -------------------------------------
+#
+# -------------------------------------
+
+# .. envvar:: varnish_server_bind_address
+#
+# IP address on which varnish server listens on for new connections. To allow
+# connections from remote hosts, you need to change this to ``0.0.0.0`` for IPv4
+# only connections, or ``::`` for IPv4 and IPv6 connections.
+#
+# When bind address is changed, you need to restart the ``varnish`` daemon to
+# rebind it to new network interfaces, it won't be restarted automatically by
+# Ansible.
+varnish_server_bind_address: ''
+varnish_admin_bind_address: 'localhost'
+
+# .. envvar:: varnish_server_port
+#
+# Port number on which this varnish server listens on.
+varnish_server_port: '6801'
+
+# .. envvar:: varnish_admin_port
+#
+# Admin port number on which this varnish server listens on.
+varnish_admin_port: '6802'
+
+varnish_server_allow: []
+
+# Maximum number of open files (for ulimit -n)
+varnish_nfiles: 131072
+
+#Locked shared memory (for ulimit -l)
+# Default log size is 82MB + header
+varnish_memlock: 82000
+
+# Maximum number of threads (for ulimit -u)
+vanrish_nprocs: "unlimited"
+
+# Maximum size of corefile (for ulimit -c). Default in Fedora is 0
+# DAEMON_COREFILE_LIMIT="unlimited"
+vanrish_corefile_limit: "unlimited"
+
+# Set this to 1 to make init script reload try to switch vcl without restart.
+# To make this work, you need to set the following variables
+# explicit: VARNISH_VCL_CONF, VARNISH_ADMIN_LISTEN_ADDRESS,
+# VARNISH_ADMIN_LISTEN_PORT, VARNISH_SECRET_FILE, or in short,
+# use Alternative 3, Advanced configuration, below
+#RELOAD_VCL: 1
+
+# tbd

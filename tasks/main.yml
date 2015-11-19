@@ -1,0 +1,68 @@
+---
+
+#    Copyright (c) 2015 JWD - Jürgen Waibel <http://jwd.de/>
+#
+#    This program is free software: you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by the
+#    Free Software Foundation, either version 3 of the License, or (at your
+#    option) any later version.  Please see LICENSE.txt at the top level of
+#    the source code distribution for details.
+#
+#   Install varnish-cache, defaults to debian default package
+#   to install a more recent version set varnish_server_upstream to true.
+#   (see https://www.varnish-cache.org/installation/debian)
+
+- name: make sure apt-transport-https package is installed
+  apt:
+    name: 'apt-transport-https'
+    state: 'latest'
+    install_recommends: False
+
+- name: Add upstream varnish APT key
+  apt_key:
+    url=https://repo.varnish-cache.org/GPG-key.txt
+  when: varnish_server_upstream|d() and varnish_server_upstream
+  tags: [ 'role::varnish_server:packages' ]
+
+- name: Add upstream varnish APT repository
+  apt_repository:
+    repo: 'deb https://repo.varnish-cache.org/debian {{ ansible_distribution_release }} varnish-{{ varnish_upstream_version }}'
+    state: 'present'
+    update_cache: True
+  when: varnish_server_upstream|d() and varnish_server_upstream
+  tags: [ 'role::varnish_server:packages' ]
+
+- name: Install Varnish.
+  apt:
+    name=varnish
+    state=installed
+
+- name: Copy a Varnish default configuration.
+  template:
+    src: etc/default/varnish.j2
+    dest: /etc/default/varnish
+    owner: root
+    group: root
+    mode: 0644
+  notify: [ 'Restart ferm' ]
+
+- name: Install Debian systemd service unit
+  template:
+    src: 'etc/systemd/system/varnish.service.j2'
+    dest: '/etc/systemd/system/varnish.service'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  notify: [ 'Restart varnish' ]
+  register: varnish_register_systemd_service
+  when: varnish_server_upstream|d() | bool
+  tags: [ 'role::varnish:config' ]
+
+- name: Reload systemd daemons
+  command: systemctl daemon-reload
+  when: ((ansible_local|d() and ansible_local.init|d() and
+          ansible_local.init == 'systemd') and
+         varnish_register_systemd_service|d() and
+         varnish_register_systemd_service.changed)
+  tags: [ 'role::varnish:config' ]
+
