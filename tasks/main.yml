@@ -44,7 +44,8 @@
     owner: root
     group: root
     mode: 0644
-  notify: [ 'Restart ferm' ]
+  notify: [ 'Restart varnish', 'Restart ferm' ]
+  tags: [ 'role::varnish:config' ]
 
 - name: Install Debian systemd service unit
   template:
